@@ -44,6 +44,7 @@ def get_soup(ticker, attempts=0):
             get_soup(ticker, attempts + 1)       
 
     driver_instance.quit()
+    print(ticker + " completed.")
     return response
 
 def extract_data(response):
@@ -102,46 +103,8 @@ def extract_data(response):
     
     return data
 
-
-# res = get_data()
-# index = [
-#     'Price', 'Rank in Cat'
-# ]
-
-# columns = [
-#     'YTD', '1-Year', '3-Year', '5-Year', '10-Year'
-# ]
-
-# data = [
-#     [ ],
-#     [ ]
-# ]
-
-# for i in res[1].find_all("tr")[1]:
-#     try:
-#         if i.string == '—':
-#             data[0].append('-')
-#         else:
-#             data[0].append(float(i.string))
-#     except ValueError as e:
-#         pass
-
-# for i in res[1].find_all("tr")[-1]:
-#     try:
-#         if i.string == '—':
-#             data[1].append('-')
-#         else:
-#             data[1].append(float(i.string))
-#     except ValueError as e:
-#         pass
-
-# data[0] = data[0][4:8]
-# data[1] = data[1][4:8]
-
-# dataframe = DataFrame(
-#     index = index, columns = columns, data= data
-# )
-# print(dataframe)
-
-print(extract_data(get_soup('spy')))
-
+def retrieve_data(list_tickers):
+    data_dict = {}
+    for ticker in list_tickers:
+        data_dict[ticker] = extract_data(get_soup(ticker))
+    return data_dict
