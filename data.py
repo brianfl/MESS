@@ -18,7 +18,7 @@ def get_soup(ticker, attempts=0):
 
     if attempts == 0:
         driver_instance.get(url)
-        time.sleep(1)
+        time.sleep(.5)
 
     else:
         driver_instance.set_page_load_timeout(10)
@@ -77,7 +77,7 @@ def extract_data(response):
         data_list = []
         for i in row.find_all('td'):
             if len(i) == 0:
-                data_list.append('')
+                data_list.append('None')
             else:
                 data_list.append(i.contents[0])
         for index_d, value in enumerate(data_list):
@@ -93,14 +93,16 @@ def extract_data(response):
         row_dict = dict()
         data_list = []
         for i in row.find_all('td'):
-            if i.contents[0] == '—':
-                data_list.append('')
+            if len(i.contents) == 0:
+                data_list.append('None')
             else:
-                data_list.append(i.contents[0])
+                if i.contents[0] == '—' or i.contents[0] == '' or i.contents[0] == " ":
+                        data_list.append('None')
+                else:
+                    data_list.append(i.contents[0])
         for index_d, value in enumerate(data_list):
             row_dict[trailing_row_tags[index_d]] = data_list[index_d]
         data['trailing'][label] = row_dict
-    
     return data
 
 def retrieve_data(list_tickers):
