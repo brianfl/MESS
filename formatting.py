@@ -76,12 +76,40 @@ def create_frame(ticker_dictionary, annual=None, trailing=None):
     return dataframe
     
 def form_book(frame_dict):
-    pass
+    with pd.ExcelWriter('MESS' + str(int(time.time())) + '.xlsx') as writer:
+        for key in frame_dict:
+            frame_dict[key].to_excel(writer, sheet_name=key)
+    print("Excel book created called MESS" + str(int(time.time())))
         
 
-data = retrieve_data(['spy', 'bnd', 'vfiax', 'qqq', 'dodwx'])
-frame = create_frame(data, trailing = ['nav_return'])
+loan_list = [
+    'ffrhx', 'oosyx', 'eiblx', 'rpifx', 'sambx', 'gsfrx', 'bfrix', 'lfrfx',
+    'cshix', 'jfidx', 'bkln', 'ftsl', 'snln', 'flrt', 'evftc'
+]
+loan_data = retrieve_data(loan_list)
+loan_frame = create_frame(loan_data, trailing = ['nav_return', 'category_rank'],
+annual=['expense_ratio'])
 
-# Next step: Forming an Excel book with multiple sheets based on groups.
+em_list = [
+    'dfcex','odvyx','newfx','lzemx','vemax','prmsx','abemx','femsx','hiemx','vwo'
+]
+em_data = retrieve_data(em_list)
+em_frame = create_frame(em_data, trailing = ['nav_return', 'category_rank'],
+annual=['expense_ratio'])
 
-frame.to_csv('book1.csv')
+es_list = [
+    'veusx','hfeix','presx','meurx','fieux','bafhx','aedyx','vesix','jfeix','idjik','vgk'
+]
+es_data = retrieve_data(es_list)
+es_frame = create_frame(es_data, trailing = ['nav_return', 'category_rank'],
+annual=['expense_ratio'])
+
+form_book(
+    {'Bank Loan': loan_frame,
+    'Emerging Markets': em_frame,
+    'Europe Stock': es_frame}
+)
+
+# Idea: A specific failure condition for 404 errors. Can skip retries entirely.
+# How to stop double posting of completed status on failures?
+# RPIFX giving incorrect data? Investigate.

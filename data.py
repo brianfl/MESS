@@ -19,16 +19,14 @@ def get_soup(ticker, attempts=0):
     if attempts == 0:
         driver_instance.get(url)
         time.sleep(.5)
-
     else:
-        driver_instance.set_page_load_timeout(10)
-        driver_instance.refresh()
-        time.sleep(attempts + 1)
+        driver_instance.get(url)
+        time.sleep(attempts*2 + 1)
 
     response = BeautifulSoup(driver_instance.page_source.encode("utf-8"), 'html.parser')
 
     if response.find_all('tbody') == []:
-        if attempts == 6:
+        if attempts == 5:
             print(
                 "Maximum retries attempted. Moving on."
             )
@@ -39,24 +37,28 @@ def get_soup(ticker, attempts=0):
             print(
                 "Failure #" + str(attempts + 1) + " for " + ticker + ". Wait " + str(round(math.exp(attempts + 1)/9 + 1,2)) + " seconds. Retrying..."
             )
+
             driver_instance.quit()
             time.sleep(math.exp(attempts + 1)/9 + 1)
             get_soup(ticker, attempts + 1)       
-
     driver_instance.quit()
     print(ticker + " completed.")
     return response
 
 def extract_data(response):
-
+    if response is None:
+        return None
     current_year = date.today().year
     tables = response.find_all('tbody')[0:2]
     data = {
         'annual': {},
         'trailing': {}
     }
-    annual_rows = tables[0].find_all('tr')
-    trailing_rows = tables[1].find_all('tr')
+    try:
+        annual_rows = tables[0].find_all('tr')
+        trailing_rows = tables[1].find_all('tr')
+    except:
+        return None
     annual_labels = [
         'price_return', 'nav_return', 'benchmark_return', 'category_return', 'expense_ratio', 'turnover_ratio', 'category_rank'
     ]
@@ -108,5 +110,8 @@ def extract_data(response):
 def retrieve_data(list_tickers):
     data_dict = {}
     for ticker in list_tickers:
-        data_dict[ticker] = extract_data(get_soup(ticker))
+        extract_value = extract_data(get_soup(ticker))
+        if extract_value is not None:
+            data_dict[ticker] = extract_value
+
     return data_dict
